@@ -2821,7 +2821,7 @@ function SendEmailMessage($body, $subject, $to, $from, $sitename, $ishtml=false,
     $sent=$mail->Send();
     $maildebug=$mail->ErrorInfo;
     if ($emailsmtpdebug>0) {
-        $maildebug .= '<li>'. gT('SMTP debug output:').'</li><pre>'.strip_tags(ob_get_contents()).'</pre>';
+        $maildebug .= '<br><strong>'. gT('SMTP debug output:').'</strong><pre>'.\CHtml::encode(ob_get_contents()).'</pre>';
         ob_end_clean();
     }
     $maildebugbody=$mail->Body;
@@ -3893,9 +3893,13 @@ function useFirebug()
 */
 function convertDateTimeFormat($value, $fromdateformat, $todateformat)
 {
-    Yii::import('application.libraries.Date_Time_Converter', true);
-    $date = new Date_Time_Converter($value, $fromdateformat);
-    return $date->convert($todateformat);
+    $date = DateTime::createFromFormat($fromdateformat, $value);
+    if ($date) {
+        return $date->format($todateformat);
+    } else {
+        $date = new DateTime($value);
+        return $date->format($todateformat);
+    }
 }
 
 /**
@@ -5364,7 +5368,7 @@ function getUserGroupList($ugid=NULL,$outputformat='optionlist')
 
             if ($gn['ugid'] == $ugid) {$selecter .= " selected='selected'"; $svexist = 1;}
             $link = Yii::app()->getController()->createUrl("/admin/usergroups/sa/view/ugid/".$gn['ugid']);
-            $selecter .=" value='{$link}'>{$gn['name']}</option>\n";
+            $selecter .=" value='{$link}'>".\CHtml::encode($gn['name'])."</option>\n";
             $simplegidarray[] = $gn['ugid'];
         }
     }
@@ -5403,7 +5407,7 @@ function getGroupUserList($ugid)
         foreach($surveynames as $sv)
         {
             $surveyselecter .= "<option";
-            $surveyselecter .=" value='{$sv['uid']}'>{$sv['users_name']} {$sv['full_name']}</option>\n";
+            $surveyselecter .=" value='{$sv['uid']}'>".\CHtml::encode($sv['users_name'])." (".\CHtml::encode($sv['full_name']).")</option>\n";
         }
     }
     $surveyselecter = "<option value='-1' selected='selected'>".gT("Please choose...")."</option>\n".$surveyselecter;
@@ -5810,7 +5814,7 @@ function getSurveyUserList($bIncludeOwner=true, $bIncludeSuperAdmins=true,$surve
             in_array($sv['uid'],$authorizedUsersList))
         {
             $surveyselecter .= "<option";
-            $surveyselecter .=" value='{$sv['uid']}'>{$sv['users_name']} {$sv['full_name']}</option>\n";
+            $surveyselecter .=" value='{$sv['uid']}'>".\CHtml::encode($sv['users_name'])." ".\CHtml::encode($sv['full_name'])."</option>\n";
             $svexist = true;
         }
     }
